@@ -1,0 +1,11 @@
+tensorflow
+scikit-learn
+flask
+flask-cors
+pandas
+numpy
+matplotlib
+seaborn
+joblib
+google-generativeai
+earthengine-api

@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotton Yield Prediction System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #0a0f0a;
+            --bg-darker: #0c120c;
+            --accent-green: #4ac97a;
+            --card-bg: #151e15;
+            --card-border: #243324;
+            --text-main: #e0f2e5;
+            --text-muted: #8ca392;
+
+            --alert-red: #ff4d4d;
+            --alert-amber: #ffc107;
+            --alert-green: #4ac97a;
+            --alert-blue: #4da6ff;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            color-scheme: dark;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .syne {
+            font-family: 'Syne', sans-serif;
+        }
+
+        .wrapper {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-darker);
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            font-size: 1.5rem;
+            color: var(--accent-green);
+            font-weight: 700;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-main);
+            background: rgba(74, 201, 122, 0.05);
+            border-left-color: var(--accent-green);
+        }
+
+        .export-section {
+            padding: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 2rem;
+            color: #fff;
+        }
+
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .clock {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--accent-green);
+            background: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+        }
+
+        .btn {
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        /* Grids and Cards */
+        .grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-muted);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: var(--accent-green);
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(255, 77, 77, 0.1);
+            color: var(--alert-red);
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.online {
+            background: rgba(74, 201, 122, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(74, 201, 122, 0.2);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(74, 201, 122, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(74, 201, 122, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(74, 201, 122, 0);
+            }
+        }
+
+        /* Progress bars */
+        .prog-row {
+            margin-bottom: 15px;
+        }
+
+        .prog-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .prog-bg {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-darker);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .prog-fill {
+            height: 100%;
+            background: var(--accent-green);
+            transition: width 0.5s ease;
+        }
+
+        /* Growth Stages */
+        .stages-container {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .stages-line {
+            position: absolute;
+            top: 15px;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: var(--card-border);
+            z-index: 1;
+        }
+
+        .stage {
+            text-align: center;
+            z-index: 2;
+            width: 14%;
+        }
+
+        .stage-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--bg-darker);
+            border: 2px solid var(--text-muted);
+            margin: 0 auto 15px auto;
+            transition: 0.3s;
+        }
+
+        .stage.active .stage-dot {
+            border-color: var(--accent-green);
+            background: var(--accent-green);
+            box-shadow: 0 0 15px rgba(74, 201, 122, 0.6);
+        }
+
+        .stage.past .stage-dot {
+            background: var(--text-muted);
+            border-color: var(--text-muted);
+        }
+
+        .stage-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stage.active .stage-label {
+            color: var(--accent-green);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .pill-green {
+            background: rgba(74, 201, 122, 0.15);
+            color: var(--accent-green);
+        }
+
+        .pill-yellow {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--alert-amber);
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-darker);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'DM Sans';
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        /* Chat UI */
+        .chat-wrap {
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .chat-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chat-row.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .avatar-bot {
+            background: var(--bg-darker);
+            border: 1px solid var(--card-border);
+        }
+
+        .avatar-user {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .msg {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .chat-row.bot .msg {
+            background: var(--bg-darker);
+            border-top-left-radius: 4px;
+            border: 1px solid var(--card-border);
+        }
+
+        .chat-row.user .msg {
+            background: var(--accent-green);
+            color: #000;
+            border-top-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: var(--bg-darker);
+            border-top: 1px solid var(--card-border);
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .qr-btn {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .qr-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: #fff;
+            font-family: 'DM Sans';
+        }
+
+        .typing {
+            display: none;
+            padding: 15px;
+            gap: 5px;
+        }
+
+        .typing.active {
+            display: flex;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Alerts List */
+        .alert-box {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+            margin-bottom: 15px;
+            background: var(--card-bg);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .alert-box.critical {
+            border-left-color: var(--alert-red);
+        }
+
+        .alert-box.warning {
+            border-left-color: var(--alert-amber);
+        }
+
+        .alert-box.info {
+            border-left-color: var(--alert-blue);
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .alert-text h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .alert-text p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .alert-time {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Toggles */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-darker);
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid var(--card-border);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-muted);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+            background-color: #000;
+        }
+
+        /* Weather Day */
+        .weather-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--bg-darker);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .w-day {
+            text-align: center;
+        }
+
+        .w-day h4 {
+            margin: 0 0 10px 0;
+            color: var(--text-muted);
+        }
+
+        .w-day span {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @media(max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                top: 0;
+                bottom: 0;
+            }
+
+            .grid-4,
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media(max-width: 600px) {
+
+            .grid-4,
+            .grid-3,
+            .grid-2,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stages-container {
+                display: none;
+            }
+
+            /* Simplify for mobile */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                🌿 AgriYield
+            </div>
+            <div class="nav-links">
+                <a class="nav-item active" onclick="nav('dashboard', 'Dashboard Overview')">📊 Dashboard</a>
+                <a class="nav-item" onclick="nav('weather', 'Weather Insights')">🌤️ Weather Insights</a>
+                <a class="nav-item" onclick="nav('predict', 'Manual Predict')">🔮 Manual Predict</a>
+                <a class="nav-item" onclick="nav('chat', 'Farm Assistant')">💬 Farm Assistant</a>
+                <a class="nav-item" onclick="nav('alerts', 'Alerts & Settings')">🔔 Alerts & Settings</a>
+            </div>
+            <div class="export-section">
+                <button class="btn btn-outline" style="width: 100%" onclick="exportReport()">📄 Export PDF
+                    Report</button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+            <div class="top-bar">
+                <h2 id="page-title" class="page-title syne">Dashboard Overview</h2>
+                <div class="top-controls">
+                    <div id="hw-status" class="status-badge">
+                        <span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span>
+                        <span id="hw-status-text">Hardware Offline</span>
+                    </div>
+                    <div id="last-seen"
+                        style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; display:none;">Last seen: --
+                    </div>
+                    <div class="clock" id="live-clock">00:00:00</div>
+                    <button class="btn" onclick="refreshSensors()">↻ Refresh Data</button>
+                </div>
+            </div>
+
+            <!-- PAGE 1: DASHBOARD -->
+            <div id="dashboard" class="page active">
+                <div class="grid grid-4">
+                    <div class="card">
+                        <h3>Biomass (kg/ha)</h3>
+                        <div class="metric-value syne" id="dash-biomass">5,420</div>
+                        <div class="metric-label">Estimated Current</div>
+                    </div>
+                    <div class="card">
+                        <h3>Yield (kg/ha)</h3>
+                        <div class="metric-value syne" id="dash-yield">2,439</div>
+                        <div class="metric-label">Projected Harvest</div>
+                    </div>
+                    <div class="card">
+                        <h3>Crop Health</h3>
+                        <div class="metric-value syne" id="dash-health" style="color:var(--accent-green)">Excellent
+                        </div>
+                        <div class="metric-label" id="dash-health-reason">NDVI > 0.75</div>
+                    </div>
+                    <div class="card">
+                        <h3>System Status</h3>
+                        <div class="metric-value syne" id="gee-badge" style="color:var(--accent-green)">Active</div>
+                        <div class="metric-label" id="gee-status-text">Satellite Synced</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-3">
+                    <div class="card">
+                        <h3 class="syne">ESP32 Sensor Readings</h3>
+                        <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                            <div>
+                                <div style="font-size:2rem; font-weight:700; color:#fff" id="sens-temp">--</div>
+                                <div style="color:var(--text-muted)">Temperature</div>
+                            </div>
+                            <div>
+                                <div style="font-size:2rem; font-weight:700; color:#fff" id="sens-hum">--</div>
+                                <div style="color:var(--text-muted)">Humidity</div>
+                            </div>
+                            <div>
+                                <div style="font-size:2rem; font-weight:700; color:#fff" id="sens-soil">--</div>
+                                <div style="color:var(--text-muted)">Soil Moisture</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="syne">Vegetation Indices</h3>
+                        <div class="prog-row">
+                            <div class="prog-labels"><span>NDVI</span><span id="prog-ndvi-val">0.72</span></div>
+                            <div class="prog-bg">
+                                <div class="prog-fill" id="prog-ndvi" style="width: 72%"></div>
+                            </div>
+                        </div>
+                        <div class="prog-row">
+                            <div class="prog-labels"><span>NDRE</span><span id="prog-ndre-val">0.45</span></div>
+                            <div class="prog-bg">
+                                <div class="prog-fill" id="prog-ndre" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="prog-row">
+                            <div class="prog-labels"><span>SAVI</span><span id="prog-savi-val">0.68</span></div>
+                            <div class="prog-bg">
+                                <div class="prog-fill" id="prog-savi" style="width: 68%"></div>
+                            </div>
+                        </div>
+                        <div class="prog-row">
+                            <div class="prog-labels"><span>EVI</span><span id="prog-evi-val">0.61</span></div>
+                            <div class="prog-bg">
+                                <div class="prog-fill" id="prog-evi" style="width: 61%"></div>
+                            </div>
+                        </div>
+                        <div class="prog-row">
+                            <div class="prog-labels"><span>GNDVI</span><span id="prog-gndvi-val">0.58</span></div>
+                            <div class="prog-bg">
+                                <div class="prog-fill" id="prog-gndvi" style="width: 58%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="syne">Active Alerts Preview</h3>
+                        <div id="dash-alerts-preview">
+                            <div style="color:var(--text-muted); font-size:0.9rem; padding:10px;">No active critical
+                                alerts.</div>
+                        </div>
+                        <div style="margin-top:15px; text-align:right;">
+                            <a href="#" style="color:var(--accent-green); text-decoration:none;"
+                                onclick="nav('alerts','Alerts & Settings')">View all alerts →</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- PAGE 3: WEATHER -->
+            <div id="weather" class="page">
+                <div class="grid grid-2">
+                    <div class="card" style="display:flex; align-items:center; gap: 30px;">
+                        <div style="font-size:5rem;" id="w-icon">⛅</div>
+                        <div>
+                            <div style="font-size:3rem; font-weight:700; color:#fff" class="syne" id="w-temp">--°C</div>
+                            <div style="font-size:1.2rem; color:var(--accent-green)" id="w-desc">Loading...</div>
+                            <div style="font-size:1rem; color:var(--text-muted); margin-top:5px;" id="w-wind">Wind: --
+                                km/h</div>
+                            <div style="color:var(--text-muted); margin-top:5px; font-size:0.85rem;">📍 Chetlapalle,
+                                Hyderabad Rural</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="card" style="padding:20px; text-align:center;">
+                            <h4 style="margin:0; color:var(--text-muted)">Humidity</h4>
+                            <div style="font-size:1.8rem; font-weight:bold; margin-top:10px;" id="w-hum">--%</div>
+                        </div>
+                        <div class="card" style="padding:20px; text-align:center;">
+                            <h4 style="margin:0; color:var(--text-muted)">Precip. Prob.</h4>
+                            <div style="font-size:1.8rem; font-weight:bold; margin-top:10px;" id="w-rain">--%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-row" id="forecast-row">
+                    <!-- Forecast items injected here -->
+                </div>
+
+                <div class="card">
+                    <h3 class="syne">Weather Impact Assessment</h3>
+                    <div id="weather-alerts-container">
+                        <div style="color:var(--text-muted); padding:20px;">No immediate weather risks detected based on
+                            latest forecast.</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- PAGE 5: MANUAL PREDICT -->
+            <div id="predict" class="page">
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h3 class="syne">Input Sensor & Satellite Data</h3>
+                        <div class="form-grid">
+                            <div class="form-group"><label>NDVI (0-1)</label><input type="number" id="inp-ndvi"
+                                    step="0.01" value="0.75"></div>
+                            <div class="form-group"><label>NDRE (0-1)</label><input type="number" id="inp-ndre"
+                                    step="0.01" value="0.45"></div>
+                            <div class="form-group"><label>SAVI (0-1)</label><input type="number" id="inp-savi"
+                                    step="0.01" value="0.50"></div>
+                            <div class="form-group"><label>EVI (0-1)</label><input type="number" id="inp-evi"
+                                    step="0.01" value="0.60"></div>
+
+                            <div class="form-group"><label>GNDVI (0-1)</label><input type="number" id="inp-gndvi"
+                                    step="0.01" value="0.65"></div>
+                            <div class="form-group"><label>Temp (°C)</label><input type="number" id="inp-temp"
+                                    value="33"></div>
+                            <div class="form-group"><label>Humidity (%)</label><input type="number" id="inp-hum"
+                                    value="62"></div>
+                            <div class="form-group"><label>Soil Moisture (%)</label><input type="number" id="inp-soil"
+                                    value="48"></div>
+                        </div>
+                        <button class="btn" style="width:100%; margin-top:15px; padding:15px;"
+                            onclick="runPrediction()">Run Prediction Model</button>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="syne">Prediction Results</h3>
+                        <div
+                            style="background:var(--bg-darker); padding:20px; border-radius:8px; text-align:center; margin-bottom:20px; border:1px solid var(--accent-green)">
+                            <div style="color:var(--text-muted); margin-bottom:5px;">Predicted Biomass</div>
+                            <div style="font-size:2.5rem; font-weight:700; font-family:'Syne'" id="res-biomass">-- kg/ha
+                            </div>
+                            <hr style="border-color:var(--card-border); margin:15px 0;">
+                            <div style="color:var(--text-muted); margin-bottom:5px;">Predicted Yield</div>
+                            <div style="font-size:2.5rem; font-weight:700; font-family:'Syne'; color:var(--accent-green)"
+                                id="res-yield">-- kg/ha</div>
+                            <br>
+                            <span class="pill pill-green" id="res-health">Awaiting Run</span>
+                        </div>
+
+                        <h4 class="syne" style="margin-bottom:10px;">DSS Recommendations</h4>
+                        <div id="dss-recs" style="color:var(--text-muted); font-size:0.95rem; line-height:1.5;">
+                            Run the model to generate logic-based recommendations.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 6: CHATBOT -->
+            <div id="chat" class="page">
+                <div class="chat-wrap">
+                    <div class="chat-messages" id="chat-box">
+                        <div class="chat-row bot">
+                            <div class="avatar avatar-bot">🌿</div>
+                            <div class="msg">Hello! I am your AI Farm Assistant. I can analyze your sensor data, provide
+                                irrigation advice, estimate yields, and identify pest risks. What would you like to
+                                know?</div>
+                        </div>
+                    </div>
+
+                    <div class="typing" id="typing-ind">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="quick-replies">
+                            <button class="qr-btn"
+                                onclick="sendSpecific('My soil moisture is 25%, what should I do?')">Low soil
+                                moisture</button>
+                            <button class="qr-btn" onclick="sendSpecific('What does NDVI 0.45 mean?')">NDVI 0.45
+                                meaning</button>
+                            <button class="qr-btn" onclick="sendSpecific('How much nitrogen fertilizer?')">Nitrogen
+                                advice</button>
+                            <button class="qr-btn"
+                                onclick="sendSpecific('My NDVI is 0.72, soil 54, temp 33 — predict yield')">Predict
+                                Yield</button>
+                            <button class="qr-btn" onclick="sendSpecific('Signs of cotton bollworm?')">Bollworm
+                                info</button>
+                            <button class="qr-btn" onclick="sendSpecific('When should I harvest?')">Harvest
+                                timing</button>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="chat-input"
+                                placeholder="Type your question here (Press Enter to send)..."
+                                onkeypress="handleChatKey(event)">
+                            <button class="btn" onclick="processChat()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 7: ALERTS -->
+            <div id="alerts" class="page">
+                <div class="grid grid-2">
+                    <div>
+                        <h3 class="syne" style="margin-top:0;">Active System Alerts</h3>
+                        <div id="active-alerts-list">
+                            <!-- Real alerts injected here -->
+                            <div
+                                style="color:var(--text-muted); padding:20px; background:var(--card-bg); border-radius:12px;">
+                                No active alerts from latest sensor scans.</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="syne">Notification Settings</h3>
+
+                        <div class="setting-row">
+                            <div>
+                                <div style="font-weight:bold; margin-bottom:5px;">SMS Alerts via Twilio</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted)">Receive critical alerts directly
+                                    to your phone.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+
+                        <div class="setting-row">
+                            <div>
+                                <div style="font-weight:bold; margin-bottom:5px;">Email Daily Report</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted)">Get a summary of predictions and
+                                    weather every morning.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+
+                        <div class="setting-row">
+                            <div>
+                                <div style="font-weight:bold; margin-bottom:5px;">Push Notifications</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted)">Browser notifications for
+                                    real-time sensor drops.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        var lastDataTime = null;
+        // histData removed. Now fetching directly from /history
+
+        // System Clock
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('live-clock').innerText = d.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        // Navigation
+        function nav(pageId, title) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('page-title').innerText = title;
+        }
+
+        // Chart.js Theme Defaults
+        Chart.defaults.color = '#8ca392';
+        Chart.defaults.borderColor = 'rgba(74, 201, 122, 0.1)';
+        Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+        // Live Hardware Synchronization
+
+        async function syncWithHardware() {
+            try {
+                const resp = await fetch('/data');
+                const data = await resp.json();
+
+                if (!data.latest) {
+                    console.log("Waiting for hardware data...");
+                    document.getElementById('hw-status').classList.remove('online');
+                    document.getElementById('hw-status').innerHTML = '<span style="width:8px; height:8px; border-radius:50%; background:currentColor;"></span> Hardware Offline';
+                    return;
+                }
+
+                const latest = data.latest;
+
+                // Update Status Badge
+                const statusBadge = document.getElementById('hw-status');
+                statusBadge.classList.add('online');
+                statusBadge.innerHTML = '<span style="width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor;"></span> Hardware Live';
+
+                if (latest.timestamp === lastDataTime) return; // No new data
+                lastDataTime = latest.timestamp;
+
+                // Update Metric Cards
+                document.getElementById('dash-biomass').innerText = Math.round(latest.predictions.biomass_kg_per_ha).toLocaleString();
+                document.getElementById('dash-yield').innerText = Math.round(latest.predictions.yield_kg_per_ha).toLocaleString();
+
+                const healthEl = document.getElementById('dash-health');
+                const healthLabelEl = document.getElementById('dash-health-reason');
+
+                healthEl.innerText = latest.crop_health_status;
+                healthLabelEl.innerText = latest.health_reason || "Optimal Conditions";
+
+                const isCritical = latest.crop_health_status.includes('Critical') || latest.crop_health_status.includes('Fair');
+                healthEl.style.color = isCritical ? 'var(--alert-amber)' : 'var(--accent-green)';
+                if (latest.crop_health_status.includes('Critical')) healthEl.style.color = 'var(--alert-red)';
+
+                // Update Sensors
+                document.getElementById('sens-temp').innerText = Math.round(latest.input_features_used.temperature) + '°C';
+                document.getElementById('sens-hum').innerText = Math.round(latest.input_features_used.humidity) + '%';
+                document.getElementById('sens-soil').innerText = Math.round(latest.input_features_used.soil_moisture) + '%';
+
+                // Update Vegetation Indices
+                const v = latest.input_features_used;
+                if (v.ndvi !== undefined) updateProg('ndvi', v.ndvi);
+                if (v.ndre !== undefined) updateProg('ndre', v.ndre);
+                if (v.savi !== undefined) updateProg('savi', v.savi);
+                if (v.evi !== undefined) updateProg('evi', v.evi);
+                if (v.gndvi !== undefined) updateProg('gndvi', v.gndvi);
+
+                // Log Sync
+                console.log("Dashboard Synced: " + new Date().toLocaleTimeString());
+            } catch (err) {
+                console.error("Hardware Sync Error:", err);
+            }
+        }
+
+        function updateProg(id, val) {
+            document.getElementById(`prog-${id}-val`).innerText = val.toFixed(2);
+            document.getElementById(`prog-${id}`).style.width = (val * 100) + '%';
+        }
+
+
+
+        function refreshSensors() {
+            console.log("Polling live data...");
+            fetch('/data')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.latest) {
+                        updateDashboard(data.latest);
+
+                        // Hardware Status Logic (Active in last 10 mins)
+                        // We compare against the server_time to avoid UTC/Local issues
+                        const parseDate = (s) => {
+                            const p = s.split(/[- :]/);
+                            return new Date(p[0], p[1] - 1, p[2], p[3], p[4], p[5]);
+                        };
+
+                        const lastSeenDate = parseDate(data.latest.timestamp);
+                        const serverDate = parseDate(data.server_time);
+                        const diffMins = (serverDate - lastSeenDate) / 60000;
+
+                        const badge = document.getElementById('hw-status');
+                        const text = document.getElementById('hw-status-text');
+                        const timeLabel = document.getElementById('last-seen');
+
+                        timeLabel.style.display = 'block';
+                        const timeStr = data.latest.timestamp.split(' ')[1].substring(0, 5);
+                        timeLabel.innerText = 'Last Updated: ' + timeStr;
+
+                        if (diffMins < 10) {
+                            badge.className = 'status-badge online pulse';
+                            badge.style = "";
+                            text.innerText = 'Hardware Online';
+                        } else if (diffMins < 1440) {  // within 24 hours
+                            badge.className = 'status-badge';
+                            badge.style.color = 'var(--alert-amber)';
+                            badge.style.borderColor = 'rgba(255, 193, 7, 0.2)';
+                            badge.style.background = 'rgba(255, 193, 7, 0.1)';
+                            text.innerText = 'Hardware Standby';
+                        } else {
+                            badge.className = 'status-badge';
+                            text.innerText = 'Hardware Offline';
+                        }
+                    }
+                    if (data.weather) {
+                        updateWeatherUI(data.weather);
+                    }
+                    if (data.gee_status) {
+                        const badge = document.getElementById('gee-badge');
+                        const text = document.getElementById('gee-status-text');
+                        badge.innerText = data.gee_status === 'Connected' ? 'Active' : 'Offline';
+                        badge.style.color = data.gee_status === 'Connected' ? 'var(--accent-green)' : 'var(--alert-red)';
+                        text.innerText = data.gee_status === 'Connected' ? 'Satellite Synced' : 'GEE Error';
+                    }
+                })
+                .catch(err => console.error("Data Poll Error:", err));
+
+            loadHistoryTable();
+            loadAlerts();
+        }
+
+        function updateDashboard(l) {
+            document.getElementById('dash-biomass').innerText = Math.round(l.predictions.biomass_kg_per_ha).toLocaleString();
+            document.getElementById('dash-yield').innerText = Math.round(l.predictions.yield_kg_per_ha).toLocaleString();
+
+            const hVal = document.getElementById('dash-health');
+            hVal.innerText = l.crop_health_status.split('(')[0];
+            document.getElementById('dash-health-reason').innerText = l.health_reason;
+
+            if (l.crop_health_status.includes('Excellent')) hVal.style.color = 'var(--alert-green)';
+            else if (l.crop_health_status.includes('Good')) hVal.style.color = 'var(--accent-green)';
+            else if (l.crop_health_status.includes('Fair')) hVal.style.color = 'var(--alert-amber)';
+            else hVal.style.color = 'var(--alert-red)';
+
+            // Sensors
+            document.getElementById('sens-temp').innerText = Math.round(l.input_features_used.temperature) + "°C";
+            document.getElementById('sens-hum').innerText = Math.round(l.input_features_used.humidity) + "%";
+            document.getElementById('sens-soil').innerText = Math.round(l.input_features_used.soil_moisture) + "%";
+
+            // Update progress bars
+            const indices = ["ndvi", "ndre", "savi", "evi", "gndvi"];
+            indices.forEach(idx => {
+                const val = l.input_features_used[idx] || 0.5;
+                const elVal = document.getElementById(`prog-${idx}-val`);
+                const elBar = document.getElementById(`prog-${idx}`);
+                if (elVal) elVal.innerText = val.toFixed(2);
+                if (elBar) elBar.style.width = (val * 100) + "%";
+            });
+        }
+
+        function updateWeatherUI(w) {
+            if (!w.current) return;
+            document.getElementById('w-temp').innerText = Math.round(w.current.temperature_2m) + "°C";
+            document.getElementById('w-hum').innerText = Math.round(w.current.relative_humidity_2m) + "%";
+            document.getElementById('w-rain').innerText = (w.daily.precipitation_probability_max[0] || 0) + "%";
+            document.getElementById('w-wind').innerText = "Wind: " + (w.current.wind_speed_10m || 0) + " km/h";
+
+            const codeMap = {
+                0: "Sunny", 1: "Clear", 2: "Partly Cloudy", 3: "Cloudy",
+                45: "Foggy", 51: "Drizzle", 61: "Rainy", 71: "Snow",
+                80: "Showers", 95: "Stormy", 96: "Severe Storm"
+            };
+            const desc = codeMap[w.current.weather_code] || "Mostly Clear";
+            document.getElementById('w-desc').innerText = desc;
+
+            const iconMap = {
+                "Sunny": "☀️", "Clear": "🌤️", "Partly Cloudy": "⛅", "Cloudy": "☁️",
+                "Foggy": "🌫️", "Drizzle": "🌧️", "Rainy": "🌦️", "Showers": "🌧️",
+                "Stormy": "⛈️", "Severe Storm": "🌩️"
+            };
+            const icon = iconMap[desc] || "☀️";
+
+            // Forecast Row
+            const fr = document.getElementById('forecast-row');
+            if (fr) {
+                fr.innerHTML = '';
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(w.daily.time[i]);
+                    const html = `
+                    <div class="w-day">
+                        <h4>${days[date.getDay()]}</h4>
+                        <div>${w.daily.precipitation_probability_max[i] > 30 ? '🌧️' : '☀️'}</div>
+                        <span>${Math.round(w.daily.temperature_2m_max[i])}° / ${Math.round(w.daily.temperature_2m_min[i])}°</span>
+                        <small style="color:var(--text-muted)">${w.daily.precipitation_probability_max[i]}%</small>
+                    </div>`;
+                    fr.insertAdjacentHTML('beforeend', html);
+                }
+            }
+        }
+
+        function loadHistoryTable() {
+            fetch('/history')
+                .then(res => res.json())
+                .then(rows => {
+                    const tbody = document.querySelector('#dashboard .card table tbody');
+                    if (!tbody) return;
+                    if (rows.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted)">No sensor history recorded yet. Start your ESP32 to begin.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = '';
+                    rows.forEach(r => {
+                        const d = new Date(r.timestamp);
+                        const html = `
+                        <tr>
+                            <td>${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                            <td>${Math.round(r.biomass)}</td>
+                            <td>${Math.round(r.yield)}</td>
+                            <td>${r.temperature}°C</td>
+                            <td>${r.soil_moisture}%</td>
+                            <td><span class="pill ${r.crop_health.includes('Excellent') ? 'pill-green' : 'pill-yellow'}">${r.crop_health}</span></td>
+                            <td><button class="btn btn-outline" style="padding:5px 10px; font-size:0.8rem">Details</button></td>
+                        </tr>`;
+                        tbody.insertAdjacentHTML('beforeend', html);
+                    });
+                });
+        }
+
+        function loadAlerts() {
+            fetch('/alerts')
+                .then(res => res.json())
+                .then(alerts => {
+                    const list = document.getElementById('active-alerts-list');
+                    const preview = document.getElementById('dash-alerts-preview');
+                    if (!list || !preview) return;
+
+                    if (alerts.length === 0) {
+                        list.innerHTML = '<div style="color:var(--text-muted); padding:20px; background:var(--card-bg); border-radius:12px;">No active alerts from latest sensor scans.</div>';
+                        preview.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; padding:10px;">No active critical alerts.</div>';
+                        return;
+                    }
+
+                    list.innerHTML = '';
+                    preview.innerHTML = '';
+
+                    alerts.forEach((a, i) => {
+                        const html = `
+                        <div class="alert-box ${a.condition.includes('Critical') ? 'critical' : 'warning'}">
+                            <div class="alert-icon">${a.condition.includes('Critical') ? '⚠️' : 'ℹ️'}</div>
+                            <div class="alert-text">
+                                <h4>${a.condition}: ${a.metric}</h4>
+                                <p>${a.action}</p>
+                            </div>
+                            <div class="alert-time">Just Now</div>
+                        </div>`;
+                        list.insertAdjacentHTML('beforeend', html);
+
+                        if (i < 2) {
+                            const previewHtml = `<div style="padding:10px; background:rgba(255,193,7,0.1); border-left:3px solid var(--alert-amber); border-radius:4px; margin-bottom:10px;">
+                            <strong style="color:var(--alert-amber)">${a.metric}:</strong> ${a.action}
+                         </div>`;
+                            preview.insertAdjacentHTML('beforeend', previewHtml);
+                        }
+                    });
+                });
+        }
+
+
+        // Chatbot Logic
+        function handleChatKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { processChat(); e.preventDefault(); }
+        }
+        function sendSpecific(msg) {
+            document.getElementById('chat-input').value = msg;
+            processChat();
+        }
+        function processChat() {
+            const inp = document.getElementById('chat-input');
+            const text = inp.value.trim();
+            if (!text) return;
+
+            appendMsg('user', text);
+            inp.value = '';
+
+            const typingInd = document.getElementById('typing-ind');
+            typingInd.classList.add('active');
+            const cb = document.getElementById('chat-box');
+            cb.scrollTop = cb.scrollHeight;
+
+            // Extract UI values for context
+            const biomassStr = document.getElementById('dash-biomass').innerText.replace(/,/g, '').split(' ')[0] || "0";
+            const yieldStr = document.getElementById('dash-yield').innerText.replace(/,/g, '').split(' ')[0] || "0";
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: text,
+                    context: {
+                        biomass: parseFloat(biomassStr),
+                        yield_kgha: parseFloat(yieldStr),
+                        ndvi: parseFloat(document.getElementById('prog-ndvi-val').innerText) || 0.72,
+                        ndre: parseFloat(document.getElementById('prog-ndre-val').innerText) || 0.45,
+                        savi: 0.68,
+                        evi: parseFloat(document.getElementById('prog-evi-val').innerText) || 0.61,
+                        gndvi: 0.58,
+                        temperature: parseFloat(document.getElementById('sens-temp').innerText.replace('°C', '')) || 33.4,
+                        humidity: parseFloat(document.getElementById('sens-hum').innerText.replace('%', '')) || 62,
+                        soil_moisture: parseFloat(document.getElementById('sens-soil').innerText.replace('%', '')) || 54,
+                        crop_health: "Excellent",
+                        growth_stage: "Boll Development",
+                        day: 78
+                    }
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    typingInd.classList.remove('active');
+                    if (data.success) {
+                        appendMsg('bot', data.reply);
+                    } else {
+                        let botReply = getBotResponse(text.toLowerCase());
+                        appendMsg('bot', botReply);
+                    }
+                })
+                .catch(err => {
+                    console.error('Chat API Error:', err);
+                    typingInd.classList.remove('active');
+                    let botReply = getBotResponse(text.toLowerCase());
+                    appendMsg('bot', botReply);
+                });
+        }
+        function appendMsg(sender, text) {
+            const cb = document.getElementById('chat-box');
+            const html = `
+            <div class="chat-row ${sender}">
+                <div class="avatar ${sender === 'bot' ? 'avatar-bot' : 'avatar-user'}">${sender === 'bot' ? '🌿' : '👤'}</div>
+                <div class="msg">${text}</div>
+            </div>`;
+            cb.insertAdjacentHTML('beforeend', html);
+            cb.scrollTop = cb.scrollHeight;
+        }
+        function getBotResponse(msg) {
+            return `I'm here to help! I can predict yields from values, give irrigation advice based on soil percentages, explain vegetation indices, or give pest/harvest recommendations. Try asking: "What should I do if soil moisture is low?"`;
+        }
+
+        // Navigation (Moved)
+        function nav(pageId, title) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (event) event.currentTarget.classList.add('active');
+            document.getElementById('page-title').innerText = title;
+        }
+
+        // System Clock
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('live-clock').innerText = d.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        // Data Export
+        function exportDataCSV() {
+            fetch('/history')
+                .then(res => res.json())
+                .then(rows => {
+                    let csvContent = "data:text/csv;charset=utf-8,Timestamp,Biomass(kg/ha),Yield(kg/ha),Temp(C),Soil(%),Health\n";
+                    rows.forEach(r => {
+                        csvContent += `${r.timestamp},${r.biomass},${r.yield},${r.temperature},${r.soil_moisture},${r.crop_health}\n`;
+                    });
+                    const encodedUri = encodeURI(csvContent);
+                    window.open(encodedUri);
+                });
+        }
+
+        // Export PDF (TXT) Logic
+        function exportReport() {
+            fetch('/history')
+                .then(res => res.json())
+                .then(rows => {
+                    const date = new Date().toLocaleString();
+                    let content = "=================================================\n";
+                    content += "     COTTON YIELD PREDICTION SYSTEM REPORT       \n";
+                    content += "=================================================\n";
+                    content += `Generated on: ${date}\n\n`;
+
+                    content += "[ SENSOR DATA HISTORY ]\n";
+                    rows.forEach(d => {
+                        content += `${d.timestamp} | Bio: ${d.biomass} | Yield: ${d.yield} | Soil: ${d.soil_moisture}%\n`;
+                    });
+
+                    const blob = new Blob([content], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Cotton_Yield_Report.txt";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+        }
+        async function pushSensorData() {
+            try {
+                await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        temperature: 32.2,
+                        humidity: 46.7,
+                        soil_moisture: 88.0,
+                        lat: 17.3513,
+                        lon: 78.3806
+                    })
+                });
+            } catch (e) { console.error("Push failed:", e); }
+        }
+
+        pushSensorData().then(() => refreshSensors());
+        setInterval(async () => { await pushSensorData(); refreshSensors(); }, 300000);
+        setInterval(refreshSensors, 30000);
+    </script>
+</body>
+
+</html>

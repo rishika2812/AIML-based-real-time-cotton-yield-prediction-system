@@ -1,0 +1,2 @@
+# AIML-based-real-time-cotton-yield-prediction-system
+The Real-Time Cotton Yield Prediction System uses IoT sensors, ESP32, Flask backend, and Machine Learning models like DNN and Random Forest to monitor crop conditions. The Flask backend handles API communication, sensor data processing, prediction generation, model integration, and dashboard updates for real-time yield analysis and recommendations.
